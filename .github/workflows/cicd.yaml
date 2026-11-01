@@ -1,0 +1,26 @@
+name: deploy to tomcat
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+     runs-on: ubuntu-latest
+
+     steps:
+       - name: checkout-code
+         uses: actions/checkout@v4
+
+       - name: bulding artifact
+         run: mvn clean package
+
+       - name: deploy to tom cat
+         run: |
+              WAR_FILE=$(ls target/*.war | head -n 1)
+              APP_NAME=madhuapp
+              curl -u "${{ secrets.TOMCAT_USERNAME }}:${{ secrets.TOMCAT_PASSWORD }}" \
+                --upload-file "$WAR_FILE" \
+                "http://${{ secrets.TOMCAT_HOST }}:8081/manager/text/deploy?path=/$APP_NAME&update=true"
